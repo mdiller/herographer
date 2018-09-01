@@ -3,18 +3,13 @@ const num_heroes = 10;
 const counter_range_days = 13;
 const increment_delta_days = 8;
 
+var counter_range_seconds = counter_range_days * 86400;
+var increment_delta_seconds = increment_delta_days * 86400;
 
-
-Date.prototype.addDays = function(days) {
-	var date = new Date(this.valueOf());
-	date.setDate(date.getDate() + days);
-	return date;
-}
-
-const is_date_in_range = (current_date, date) => {
-	start = current_date.addDays(0 - counter_range_days);
-	end = current_date.addDays(counter_range_days);
-	return date < end && date > start;
+const is_timestamp_in_range = (current_timestamp, timestamp) => {
+	var start = current_timestamp - counter_range_seconds;
+	var end = current_timestamp + counter_range_seconds;
+	return timestamp < end && timestamp > start;
 }
 
 function getDayString(date) {
@@ -36,10 +31,10 @@ $.ajax({
 	console.log("heroes:")
 	console.log(heroes);
 
-	matches.forEach(match => match.date = new Date(match.start_time * 1000));
+	// matches.forEach(match => match.date = new Date(match.start_time * 1000));
 
-	var first_day =matches[matches.length - 1].date;
-	var last_day = matches[0].date;
+	var first_day =matches[matches.length - 1].start_time;
+	var last_day = matches[0].start_time;
 
 	var hero_totals = {}
 	matches.forEach(match => hero_totals[match.hero_id] = (hero_totals[match.hero_id] || 0) + 1);
@@ -50,25 +45,27 @@ $.ajax({
 		.map((hero, count) => parseInt(hero));
 
 	// generate date increments
+	var increment_timestamps = [];
 	var increment_dates = [];
-	var current_date = first_day;
-	while (current_date < last_day) {
-		increment_dates.push(current_date);
-		current_date = current_date.addDays(increment_delta_days);
+	var timestamp = first_day;
+	while (timestamp < last_day) {
+		increment_timestamps.push(timestamp);
+		increment_dates.push(new Date(timestamp * 1000))
+		timestamp = timestamp + increment_delta_seconds;
 	}
 
 	var hero_infos = top_heroes.map(hero_id => {
 		return {
 			hero_id: hero_id,
 			hero: heroes[hero_id],
-			counts: increment_dates.map(date => 0)
+			counts: increment_timestamps.map(date => 0)
 		};
 	})
 
 	// generate hero match data
-	for (var i = 0; i < increment_dates.length; i++) {
+	for (var i = 0; i < increment_timestamps.length; i++) {
 		matches.forEach(match => {
-			if (is_date_in_range(increment_dates[i], match.date)) {
+			if (is_timestamp_in_range(increment_timestamps[i], match.start_time)) {
 				hero_infos.forEach(hero_info => {
 					if (hero_info.hero_id == match.hero_id) {
 						hero_info.counts[i]++;
@@ -78,27 +75,14 @@ $.ajax({
 		})
 	}
 
-	// generate hero graph data
-	var data = hero_infos.map(hero_info => {
-		var line = [];
-		for (var i = 0; i < increment_dates.length; i++) {
-			line.push({
-				t: increment_dates[i],
-				y: hero_info.counts[i]
-			})
-		}
-		return {
-			label: hero_info.hero.localized_name,
-			data: line,
-			backgroundColor: "transparent",
-			borderColor: hero_info.hero.color
-		}
-	});
-
 	var dyData = []
 
-	for (var i = 0; i < increment_dates.length; i++) {
+	for (var i = 0; i < increment_timestamps.length; i++) {
 		var column = hero_infos.map(hero_info => hero_info.counts[i]);
+
+		// var total = column.reduce((a, b) => a + b) || 1;
+		// column = column.map(v => (v * 100.0) / total)
+
 		column.unshift(increment_dates[i]);
 		dyData.push(column);
 	}
@@ -114,17 +98,29 @@ $.ajax({
 		}
 	});
 
+	function legendFormatter(data) {
+		if (data.x == null) return '';  // no selection
+		var lines = data.series.map(hero_data => {
+			var hero = Object.values(heroes).find(h => h.localized_name === hero_data.label);
+			return `<tr><td><img src="${hero.icon}"></td><td style='color: ${hero.color}'>${hero_data.labelHTML}</span></td><td>${hero_data.yHTML}</td></tr>`;
+		});
+		return `${data.xHTML}<br><table>${lines.join(" ")}</table>`;
+	}
 
 	var div = document.getElementById("graphdiv");
 	var graph = new Dygraph(div, 
 		dyData,
 		{
+			fillGraph: true,
+			fillAlpha: 1.0,
+			stackedGraph: true,
 			labels: dyLabels,
 			series: dySeries,
 			labelsDiv: "legend",
 			labelsSeparateLines: true,
 			hideOverlayOnMouseOut: false,
-			strokeWidth: 2
+			strokeWidth: 2,
+			title: "Most Played Heroes",
+			legendFormatter: legendFormatter
 		});
-
 });
