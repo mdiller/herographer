@@ -20,18 +20,12 @@ function getDayString(date) {
 	});
 }
 
-function recreateGraph(matches) {
-	// Begin accessing JSON data here
-	console.log("matches:")
-	console.log(matches);
-	
-	console.log("heroes:")
-	console.log(heroes);
-
+function recreateGraph(matches, graph_config) {
 	// matches.forEach(match => match.date = new Date(match.start_time * 1000));
+	console.time("creating graph");
 
-	var first_day =matches[matches.length - 1].start_time;
-	var last_day = matches[0].start_time;
+	var first_day = matches[0].start_time;
+	var last_day = matches[matches.length - 1].start_time;
 
 	var hero_totals = {}
 	matches.forEach(match => hero_totals[match.hero_id] = (hero_totals[match.hero_id] || 0) + 1);
@@ -40,6 +34,7 @@ function recreateGraph(matches) {
 		.sort((key, value) =>  value[1] - key[1])
 		.slice(0, 10)
 		.map((hero, count) => parseInt(hero));
+
 
 	// generate date increments
 	var increment_timestamps = [];
@@ -59,18 +54,30 @@ function recreateGraph(matches) {
 		};
 	})
 
+	console.time("make increment_dates");
 	// generate hero match data
-	for (var i = 0; i < increment_timestamps.length; i++) {
-		matches.forEach(match => {
-			if (is_timestamp_in_range(increment_timestamps[i], match.start_time)) {
-				hero_infos.forEach(hero_info => {
-					if (hero_info.hero_id == match.hero_id) {
-						hero_info.counts[i]++;
-					}
-				});
+	var i = 0; // increment_timestamps index
+	var j = 0; // matches index
+	var start_j = 0; // the start of our matches window
+	for (i = 0; i < increment_timestamps.length; i++) {
+		for (j = start_j; j < matches.length; j++) {
+			if (is_timestamp_in_range(increment_timestamps[i], matches[j].start_time)) {
+				var hero_info = hero_infos.find(h => h.hero_id == matches[j].hero_id);
+				if (hero_info) {
+					hero_info.counts[i]++;
+				}
 			}
-		})
+			else if (matches[j].start_time > increment_timestamps[i]) {
+				// all matches after this are cronologically after this so we dont need them
+				break;
+			}
+			else {
+				// all other increment dates are after this one, so they dont need this match
+				start_j = j + 1;
+			}
+		}
 	}
+	console.timeEnd("make increment_dates");
 
 	var dyData = []
 
@@ -103,6 +110,7 @@ function recreateGraph(matches) {
 		});
 		return `${data.xHTML}<br><table>${lines.join(" ")}</table>`;
 	}
+	console.timeEnd("creating graph");
 
 	var div = document.getElementById("graphdiv");
 	var graph = new Dygraph(div, 
@@ -110,7 +118,7 @@ function recreateGraph(matches) {
 		{
 			fillGraph: true,
 			fillAlpha: 1.0,
-			stackedGraph: true,
+			stackedGraph: graph_config.stacked,
 			labels: dyLabels,
 			series: dySeries,
 			labelsDiv: "legend",
@@ -120,6 +128,7 @@ function recreateGraph(matches) {
 			title: "Most Played Heroes",
 			legendFormatter: legendFormatter
 		});
+
 };
 
 
@@ -132,7 +141,10 @@ const app = new Vue({
 	el: '#app',
 	data: {
 		player_id: null,
-		matches: []
+		matches: [],
+		graph: {
+			stacked: false
+		}
 	},
 	watch: {
 		player_id: function(new_player_id, old_player_id) {
@@ -140,20 +152,31 @@ const app = new Vue({
 			this.debouncedGetPlayerMatches();
 		},
 		matches: function(new_matches, old_matches) {
-			recreateGraph(new_matches);
+			this.debouncedRecreateGraph(new_matches, this.graph);
+		},
+		graph: {
+			handler: function(new_graph, old_graph) {
+				this.debouncedRecreateGraph(this.matches, new_graph);
+			},
+			deep: true
 		}
 	},
 	methods: {
 		getPlayerMatches: function() {
 			var self = this;
 			axios.get(`https://api.opendota.com/api/players/${this.player_id}/matches`)
-				.then(response => self.matches = response.data)
+				.then(response => {
+					var matches = response.data;
+					matches.sort(m => m.start_time);
+					self.matches = matches;
+				})
 				.catch(error => alert(error));
 		}
 	},
 	created() {
 		// fetch call here that sets products
-		this.debouncedGetPlayerMatches = _.debounce(this.getPlayerMatches, 500);
+		this.debouncedGetPlayerMatches = _.debounce(this.getPlayerMatches, 200);
+		this.debouncedRecreateGraph = _.debounce(recreateGraph, 200);
 
 		this.player_id = 95211699;
 	}

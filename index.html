@@ -41,15 +41,23 @@ body {
 	width: 24px;
 	height: 24px;
 }
+h2 {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
 </style>
 
 <body>
 	<div id="graphdiv"></div>
 	<div id="sidebar">
-		<div id="legend"></div>
 		<div id="app">
-			<input placeholder="Steam ID" v-model.message="player_id">
+			<label for="player_id">Player ID</label>
+			<input id="player_id" type="number" v-model="player_id" placeholder="Steam ID">
+			<h2>Graph Options</h2>
+			<input id="checkbox" type="checkbox" v-model="graph.stacked">
+			<label for="checkbox">Stacked</label>
 		</div>
+		<div id="legend"></div>
 	</div>
 </body>
 
