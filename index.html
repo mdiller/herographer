@@ -3,27 +3,45 @@
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta content="utf-8" http-equiv="encoding">
 
-<body>
+<head>
+	<link rel="stylesheet" src="sygraph.css" />
+</head>
 <style>
 html, body{
-  padding: 0;
-  margin: 0;
+	padding: 0;
+	margin: 0;
 }
 html{
-  height: 100%;
+	height: 100%;
 }
-body{
-  height: 100%;
-  max-height: 100%;
+body {
+	height: 100%;
+	max-height: 100%;
+	width: 100%;
+	max-width: 100%;
+	display: flex;
+}
+#graphdiv {
+	height: 100%;
+	width: 85%;
+	flex: 85%;
+}
+#legend {
+	height: 100%;
+	width: 15%;
+	flex: 15%;
 }
 </style>
-<canvas id="myChart" width="400" height="400"></canvas>
+
+<body>
+	<div id="graphdiv"></div>
+	<div id="legend"></div>
 </body>
-<script
-              src="https://code.jquery.com/jquery-3.3.1.min.js"
-              integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-              crossorigin="anonymous"></script>
-<script src="https://npmcdn.com/chart.js@latest/dist/Chart.bundle.min.js"></script>
-<script src="https://npmcdn.com/Chart.Zoom.js@latest/Chart.Zoom.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
+<script src="smooth-plotter.js"></script>
 <script src="heroes.js"></script>
 <script src="script.js"></script>

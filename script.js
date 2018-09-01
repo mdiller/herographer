@@ -95,60 +95,36 @@ $.ajax({
 		}
 	});
 
-	var ctx = document.getElementById("myChart").getContext('2d');
-	var myChart = new Chart(ctx, {
-		type: 'line',
-		data: {
-			labels: increment_dates.map(getDayString),
-			datasets: data
-		},
-		options: {
-			scales: {
-				xAxes: [{
-					type: 'time',
-					time: {
-						displayFormats: {
-							quarter: 'MMM YYYY'
-						}
-					}
-				}],
-				yAxes: [{
-					type: 'logarithmic'
-				}]
-			},
-			elements: {
-				point: {
-					radius: 0
-				}
-			},
-			pan: {
-				enabled: true,
-				mode: 'xy',
-				rangeMin: {
-					// Format of min pan range depends on scale type
-					x: null,
-					y: null
-				},
-				rangeMax: {
-					// Format of max pan range depends on scale type
-					x: null,
-					y: null
-				}
-			},
-			zoom: {
-				enabled: true,
-				drag: true,
-				mode: 'xy',
-				rangeMin: {
-					x: null,
-					y: null
-				},
-				rangeMax: {
-					x: null,
-					y: null
-				}
-			}
+	var dyData = []
+
+	for (var i = 0; i < increment_dates.length; i++) {
+		var column = hero_infos.map(hero_info => hero_info.counts[i]);
+		column.unshift(increment_dates[i]);
+		dyData.push(column);
+	}
+
+	var dyLabels = hero_infos.map(hero_info => hero_info.hero.localized_name);
+	dyLabels.unshift("Time");
+
+	var dySeries = {};
+	hero_infos.forEach(hero_info => {
+		dySeries[hero_info.hero.localized_name] = {
+			color: hero_info.hero.color,
+			plotter: smoothPlotter
 		}
 	});
+
+
+	var div = document.getElementById("graphdiv");
+	var graph = new Dygraph(div, 
+		dyData,
+		{
+			labels: dyLabels,
+			series: dySeries,
+			labelsDiv: "legend",
+			labelsSeparateLines: true,
+			hideOverlayOnMouseOut: false,
+			strokeWidth: 2
+		});
 
 });
