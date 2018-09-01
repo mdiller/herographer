@@ -39,9 +39,16 @@ body {
 
 <body>
 	<div id="graphdiv"></div>
-	<div id="legend"></div>
+	<div id="sidebar">
+		<div id="app">
+			<input placeholder="Steam ID" v-model.message="player_id">
+		</div>
+		<div id="legend"></div>
+	</div>
 </body>
 
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+<script src="https://unpkg.com/vue"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"
 	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
 	crossorigin="anonymous"></script>

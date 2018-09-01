@@ -20,10 +20,7 @@ function getDayString(date) {
 	});
 }
 
-$.ajax({
-	url: 'https://api.opendota.com/api/players/95211699/matches',
-	dataType: 'json'
-}).then(matches => {
+function recreateGraph(matches) {
 	// Begin accessing JSON data here
 	console.log("matches:")
 	console.log(matches);
@@ -123,4 +120,42 @@ $.ajax({
 			title: "Most Played Heroes",
 			legendFormatter: legendFormatter
 		});
-});
+};
+
+
+// $.ajax({
+// 	url: 'https://api.opendota.com/api/players/95211699/matches',
+// 	dataType: 'json'
+// }).then(recreateGraph);
+
+const app = new Vue({
+	el: '#app',
+	data: {
+		player_id: null,
+		matches: []
+	},
+	watch: {
+		player_id: function(new_player_id, old_player_id) {
+			// debounce here
+			this.debouncedGetPlayerMatches();
+		},
+		matches: function(new_matches, old_matches) {
+			recreateGraph(new_matches);
+		}
+	},
+	methods: {
+		getPlayerMatches: function() {
+			var self = this;
+			$.ajax({
+				url: `https://api.opendota.com/api/players/${this.player_id}/matches`,
+				dataType: "json"
+			}).then(m => self.matches = m);
+		}
+	},
+	created() {
+		// fetch call here that sets products
+		this.debouncedGetPlayerMatches = _.debounce(this.getPlayerMatches, 500);
+
+		this.player_id = 95211699;
+	}
+})
