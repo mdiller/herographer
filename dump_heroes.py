@@ -14,5 +14,8 @@ for hero in session.query(Hero):
         "color": hero.color
     }
 
-with open("heroes.json", "w+") as f:
-    f.write(json.dumps(data, indent='\t'))
+text = json.dumps(data, indent='\t')
+text = "var heroes = " + text
+
+with open("heroes.js", "w+") as f:
+    f.write(text)

@@ -688,5 +688,11 @@ var heroes = {
 		"localized_name": "Pangolier",
 		"icon": "http://dotabase.dillerm.io/dota-vpk/resource/flash3/images/miniheroes/pangolier.png",
 		"color": "#5e314c"
+	},
+	"121": {
+		"id": 121,
+		"localized_name": "Grimstroke",
+		"icon": "http://dotabase.dillerm.io/dota-vpk/resource/flash3/images/miniheroes/grimstroke.png",
+		"color": "#9d0700"
 	}
 }

@@ -146,10 +146,9 @@ const app = new Vue({
 	methods: {
 		getPlayerMatches: function() {
 			var self = this;
-			$.ajax({
-				url: `https://api.opendota.com/api/players/${this.player_id}/matches`,
-				dataType: "json"
-			}).then(m => self.matches = m);
+			axios.get(`https://api.opendota.com/api/players/${this.player_id}/matches`)
+				.then(response => self.matches = response.data)
+				.catch(error => alert(error));
 		}
 	},
 	created() {

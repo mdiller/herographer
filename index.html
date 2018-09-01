@@ -5,6 +5,7 @@
 
 <head>
 	<link rel="stylesheet" src="sygraph.css" />
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
 </head>
 <style>
 html, body{
@@ -15,6 +16,8 @@ html{
 	height: 100%;
 }
 body {
+	font-family: 'Roboto', sans-serif;
+	font-weight: 500;
 	height: 100%;
 	max-height: 100%;
 	width: 100%;
@@ -22,16 +25,19 @@ body {
 	display: flex;
 }
 #graphdiv {
-	height: 100%;
+	height: 98%;
 	width: 85%;
 	flex: 85%;
 }
-#legend {
-	height: 100%;
+#sidebar {
 	width: 15%;
 	flex: 15%;
 }
+#legend {
+	vertical-align: center;
+}
 #legend img {
+	margin-top: 2px;
 	width: 24px;
 	height: 24px;
 }
@@ -40,18 +46,16 @@ body {
 <body>
 	<div id="graphdiv"></div>
 	<div id="sidebar">
+		<div id="legend"></div>
 		<div id="app">
 			<input placeholder="Steam ID" v-model.message="player_id">
 		</div>
-		<div id="legend"></div>
 	</div>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
 <script src="https://unpkg.com/vue"></script>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"
-	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-	crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
 <script src="smooth-plotter.js"></script>
 <script src="heroes.js"></script>
