@@ -34,6 +34,7 @@ body {
 	flex: 15%;
 }
 #legend {
+	margin-top: 20px;
 	vertical-align: center;
 }
 #legend img {
@@ -54,8 +55,25 @@ h2 {
 			<label for="player_id">Player ID</label>
 			<input id="player_id" type="number" v-model="player_id" placeholder="Steam ID">
 			<h2>Graph Options</h2>
-			<input id="checkbox" type="checkbox" v-model="graph.stacked">
-			<label for="checkbox">Stacked</label>
+			<input id="graph_smooth_lines" type="checkbox" v-model="graph.smooth_lines">
+			<label for="graph_smooth_lines">Smooth Lines</label>
+			<br>
+			<input id="graph_stacked" type="checkbox" v-model="graph.stacked">
+			<label for="graph_stacked">Stacked</label>
+			<br>
+			<input id="graph_fill" type="checkbox" v-model="graph.fill">
+			<label for="graph_fill">Fill</label>
+			<br>
+			<h2>Data Options</h2>
+			<input id="graph_percentage" type="checkbox" v-model="graph.percentage">
+			<label for="graph_percentage">Percentage</label>
+			<br>
+			<label for="graph_increment_delta">Increment Delta (days)</label>
+			<input id="graph_increment_delta" type="number" v-model="graph.increment_delta">
+			<br>
+			<label for="graph_increment_range">Increment Range (days)</label>
+			<input id="graph_increment_range" type="number" v-model="graph.increment_range">
+			<br>
 		</div>
 		<div id="legend"></div>
 	</div>

@@ -1,14 +1,6 @@
-
-const num_heroes = 10;
-const counter_range_days = 13;
-const increment_delta_days = 8;
-
-var counter_range_seconds = counter_range_days * 86400;
-var increment_delta_seconds = increment_delta_days * 86400;
-
-const is_timestamp_in_range = (current_timestamp, timestamp) => {
-	var start = current_timestamp - counter_range_seconds;
-	var end = current_timestamp + counter_range_seconds;
+const is_timestamp_in_range = (current_timestamp, timestamp, range) => {
+	var start = current_timestamp - range;
+	var end = current_timestamp + range;
 	return timestamp < end && timestamp > start;
 }
 
@@ -20,8 +12,10 @@ function getDayString(date) {
 	});
 }
 
-function recreateGraph(matches, graph_config) {
-	// matches.forEach(match => match.date = new Date(match.start_time * 1000));
+function recreateGraph(matches, graph) {
+	var increment_range_seconds = graph.increment_range * 86400;
+	var increment_delta_seconds = graph.increment_delta * 86400;
+
 	console.time("creating graph");
 
 	var first_day = matches[0].start_time;
@@ -32,7 +26,7 @@ function recreateGraph(matches, graph_config) {
 	var top_heroes = Object.keys(hero_totals)
 		.map(key => [key, hero_totals[key]])
 		.sort((key, value) =>  value[1] - key[1])
-		.slice(0, 10)
+		.slice(0, graph.num_heroes)
 		.map((hero, count) => parseInt(hero));
 
 
@@ -54,14 +48,13 @@ function recreateGraph(matches, graph_config) {
 		};
 	})
 
-	console.time("make increment_dates");
 	// generate hero match data
 	var i = 0; // increment_timestamps index
 	var j = 0; // matches index
 	var start_j = 0; // the start of our matches window
 	for (i = 0; i < increment_timestamps.length; i++) {
 		for (j = start_j; j < matches.length; j++) {
-			if (is_timestamp_in_range(increment_timestamps[i], matches[j].start_time)) {
+			if (is_timestamp_in_range(increment_timestamps[i], matches[j].start_time, increment_range_seconds)) {
 				var hero_info = hero_infos.find(h => h.hero_id == matches[j].hero_id);
 				if (hero_info) {
 					hero_info.counts[i]++;
@@ -77,15 +70,16 @@ function recreateGraph(matches, graph_config) {
 			}
 		}
 	}
-	console.timeEnd("make increment_dates");
 
 	var dyData = []
 
 	for (var i = 0; i < increment_timestamps.length; i++) {
 		var column = hero_infos.map(hero_info => hero_info.counts[i]);
 
-		// var total = column.reduce((a, b) => a + b) || 1;
-		// column = column.map(v => (v * 100.0) / total)
+		if (graph.percentage) {
+			var total = column.reduce((a, b) => a + b) || 1;
+			column = column.map(v => (v * 100.0) / total)
+		}
 
 		column.unshift(increment_dates[i]);
 		dyData.push(column);
@@ -97,8 +91,10 @@ function recreateGraph(matches, graph_config) {
 	var dySeries = {};
 	hero_infos.forEach(hero_info => {
 		dySeries[hero_info.hero.localized_name] = {
-			color: hero_info.hero.color,
-			plotter: smoothPlotter
+			color: hero_info.hero.color
+		}
+		if (graph.smooth_lines){
+			dySeries[hero_info.hero.localized_name].plotter = smoothPlotter
 		}
 	});
 
@@ -116,15 +112,15 @@ function recreateGraph(matches, graph_config) {
 	var graph = new Dygraph(div, 
 		dyData,
 		{
-			fillGraph: true,
+			fillGraph: graph.fill,
 			fillAlpha: 1.0,
-			stackedGraph: graph_config.stacked,
+			stackedGraph: graph.stacked,
 			labels: dyLabels,
 			series: dySeries,
 			labelsDiv: "legend",
-			labelsSeparateLines: true,
 			hideOverlayOnMouseOut: false,
-			strokeWidth: 2,
+			animatedZooms: true,
+			strokeWidth: graph.fill ? 0 : 2,
 			title: "Most Played Heroes",
 			legendFormatter: legendFormatter
 		});
@@ -143,20 +139,38 @@ const app = new Vue({
 		player_id: null,
 		matches: [],
 		graph: {
-			stacked: false
+			stacked: false,
+			smooth_lines: true,
+			fill: false,
+			percentage: false,
+			num_heroes: 10,
+			increment_delta: 8,
+			increment_range: 24
 		}
 	},
 	watch: {
-		player_id: function(new_player_id, old_player_id) {
+		player_id() {
 			// debounce here
 			this.debouncedGetPlayerMatches();
 		},
-		matches: function(new_matches, old_matches) {
-			this.debouncedRecreateGraph(new_matches, this.graph);
+		matches() {
+			this.debouncedRecreateGraph(this.matches, this.graph);
+		},
+		"graph.fill": function() {
+			console.log("hi there");
+			if (this.graph.fill) {
+				console.log("hello");
+				this.graph.smooth_lines = false;
+			}
+		},
+		"graph.smooth_lines": function() {
+			if (this.graph.smooth_lines) {
+				this.graph.fill = false;
+			}
 		},
 		graph: {
-			handler: function(new_graph, old_graph) {
-				this.debouncedRecreateGraph(this.matches, new_graph);
+			handler() {
+				this.debouncedRecreateGraph(this.matches, this.graph);
 			},
 			deep: true
 		}
