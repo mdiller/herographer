@@ -33,11 +33,11 @@ body {
 	width: 15%;
 	flex: 15%;
 }
-#legend {
-	margin-top: 20px;
-	vertical-align: center;
+#hero_table td:last-child {
+	text-align: center;
+	width: 50px;
 }
-#legend img {
+#hero_table img {
 	margin-top: 2px;
 	width: 24px;
 	height: 24px;
@@ -90,6 +90,19 @@ h2 {
 			<label for="graph_increment_range">Increment Range (days)</label>
 			<input id="graph_increment_range" type="number" v-model="graph.increment_range">
 			<br>
+			<table id="hero_table">
+				<tr v-for="hero in heroes">
+					<td>
+						<img :src="hero.icon">
+					</td>
+					<td v-bind:style="{ color: hero.color }">
+						{{hero.localized_name}}
+					</td>
+					<td>
+						{{hero.value}}
+					</td>
+				</tr>
+			</table>
 		</div>
 		<div id="legend"></div>
 	</div>

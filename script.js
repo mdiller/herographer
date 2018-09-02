@@ -1,6 +1,6 @@
 const is_timestamp_in_range = (current_timestamp, timestamp, range) => {
-	var start = current_timestamp - range;
-	var end = current_timestamp + range;
+	var start = current_timestamp - (range / 2);
+	var end = current_timestamp + (range / 2);
 	return timestamp < end && timestamp > start;
 }
 
@@ -12,7 +12,10 @@ function getDayString(date) {
 	});
 }
 
-function recreateGraph(matches, graph) {
+function recreateGraph(self) {
+	var matches = self.matches;
+	var graph = self.graph;
+
 	var increment_range_seconds = graph.increment_range * 86400;
 	var increment_delta_seconds = graph.increment_delta * 86400;
 
@@ -43,7 +46,7 @@ function recreateGraph(matches, graph) {
 	var hero_infos = top_heroes.map(hero_id => {
 		return {
 			hero_id: hero_id,
-			hero: heroes[hero_id],
+			hero: hero_information[hero_id],
 			counts: increment_timestamps.map(date => 0)
 		};
 	})
@@ -99,12 +102,13 @@ function recreateGraph(matches, graph) {
 	});
 
 	function legendFormatter(data) {
-		if (data.x == null) return '';  // no selection
-		var lines = data.series.map(hero_data => {
-			var hero = Object.values(heroes).find(h => h.localized_name === hero_data.label);
-			return `<tr><td><img src="${hero.icon}"></td><td style='color: ${hero.color}'>${hero_data.labelHTML}</span></td><td>${hero_data.yHTML}</td></tr>`;
+		var heroes = self.heroes;
+		data.series.forEach(hero_data => {
+			var hero = heroes.find(h => h.localized_name == hero_data.labelHTML);
+			hero.value = hero_data.yHTML;
 		});
-		return `${data.xHTML}<br><table>${lines.join(" ")}</table>`;
+		self.heroes.__ob__.dep.notify();
+		return "";
 	}
 	console.timeEnd("creating graph");
 
@@ -117,13 +121,11 @@ function recreateGraph(matches, graph) {
 			stackedGraph: graph.stacked,
 			labels: dyLabels,
 			series: dySeries,
-			labelsDiv: "legend",
 			hideOverlayOnMouseOut: false,
 			animatedZooms: true,
 			strokeWidth: graph.fill ? 0 : 2,
 			legendFormatter: legendFormatter
 		});
-
 };
 
 const app = new Vue({
@@ -140,10 +142,11 @@ const app = new Vue({
 			num_heroes: 10,
 			increment_delta: 8,
 			increment_range: 24
-		}
+		},
+		heroes: []
 	},
 	computed: {
-		title: function() {
+		title() {
 			if (this.player_info && this.player_info.profile && this.player_info.profile.personaname) {
 				return `${this.player_info.profile.personaname}'s Most Played Heroes`;
 			}
@@ -158,12 +161,21 @@ const app = new Vue({
 			this.debouncedGetPlayerMatches();
 		},
 		matches() {
-			this.debouncedRecreateGraph(this.matches, this.graph);
+			this.debouncedRecreateGraph(this);
+
+			var hero_totals = {};
+			this.matches.forEach(match => hero_totals[match.hero_id] = (hero_totals[match.hero_id] || 0) + 1);
+			this.heroes = Object.keys(hero_totals)
+				.map(key => [key, hero_totals[key]])
+				.sort((key, value) =>  value[1] - key[1])
+				.slice(0, this.graph.num_heroes)
+				.map((hero_id, count) => hero_information[parseInt(hero_id)]);
 		},
 		"graph.fill": function() {
 			if (this.graph.fill) {
 				this.graph.smooth_lines = false;
 			}
+			console.log(this.heroes);
 		},
 		"graph.smooth_lines": function() {
 			if (this.graph.smooth_lines) {
@@ -172,7 +184,7 @@ const app = new Vue({
 		},
 		graph: {
 			handler() {
-				this.debouncedRecreateGraph(this.matches, this.graph);
+				this.debouncedRecreateGraph(this);
 			},
 			deep: true
 		}

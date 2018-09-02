@@ -1,4 +1,4 @@
-var heroes = {
+var hero_information = {
 	"1": {
 		"id": 1,
 		"localized_name": "Anti-Mage",
