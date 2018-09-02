@@ -46,12 +46,28 @@ h2 {
 	margin-top: 10px;
 	margin-bottom: 5px;
 }
+#app {
+	margin-top: 20px;
+}
+#graphtitle {
+	position: fixed;
+	width: 100%;
+	top: 0;
+	left: 0;
+	padding: 50px;
+	font-size: 30px;
+	text-align: center;
+	pointer-events: none;
+}
 </style>
 
 <body>
 	<div id="graphdiv"></div>
 	<div id="sidebar">
 		<div id="app">
+			<div id="graphtitle">
+				{{title}}
+			</div>
 			<label for="player_id">Player ID</label>
 			<input id="player_id" type="number" v-model="player_id" placeholder="Steam ID">
 			<h2>Graph Options</h2>

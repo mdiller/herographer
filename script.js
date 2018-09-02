@@ -121,23 +121,17 @@ function recreateGraph(matches, graph) {
 			hideOverlayOnMouseOut: false,
 			animatedZooms: true,
 			strokeWidth: graph.fill ? 0 : 2,
-			title: "Most Played Heroes",
 			legendFormatter: legendFormatter
 		});
 
 };
-
-
-// $.ajax({
-// 	url: 'https://api.opendota.com/api/players/95211699/matches',
-// 	dataType: 'json'
-// }).then(recreateGraph);
 
 const app = new Vue({
 	el: '#app',
 	data: {
 		player_id: null,
 		matches: [],
+		player_info: {},
 		graph: {
 			stacked: false,
 			smooth_lines: true,
@@ -146,6 +140,16 @@ const app = new Vue({
 			num_heroes: 10,
 			increment_delta: 8,
 			increment_range: 24
+		}
+	},
+	computed: {
+		title: function() {
+			if (this.player_info && this.player_info.profile && this.player_info.profile.personaname) {
+				return `${this.player_info.profile.personaname}'s Most Played Heroes`;
+			}
+			else {
+				return "Loading...";
+			}
 		}
 	},
 	watch: {
@@ -157,9 +161,7 @@ const app = new Vue({
 			this.debouncedRecreateGraph(this.matches, this.graph);
 		},
 		"graph.fill": function() {
-			console.log("hi there");
 			if (this.graph.fill) {
-				console.log("hello");
 				this.graph.smooth_lines = false;
 			}
 		},
@@ -181,8 +183,22 @@ const app = new Vue({
 			axios.get(`https://api.opendota.com/api/players/${this.player_id}/matches`)
 				.then(response => {
 					var matches = response.data;
-					matches.sort(m => m.start_time);
-					self.matches = matches;
+					if (matches.length > 1)
+					{
+						// only set matches if it was successful
+						matches.sort(m => m.start_time);
+						self.matches = matches;
+					}
+				})
+				.catch(error => alert(error));
+			axios.get(`https://api.opendota.com/api/players/${this.player_id}`)
+				.then(response => {
+					var player_info = response.data;
+					if (player_info && player_info.profile)
+					{
+						// only set player_info if it was successful
+						self.player_info = player_info;
+					}
 				})
 				.catch(error => alert(error));
 		}
