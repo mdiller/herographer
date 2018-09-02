@@ -49,7 +49,7 @@ function recreateGraph(self) {
 			hero: hero_information[hero_id],
 			counts: increment_timestamps.map(date => 0)
 		};
-	})
+	});
 
 	// generate hero match data
 	var i = 0; // increment_timestamps index
@@ -175,7 +175,6 @@ const app = new Vue({
 			if (this.graph.fill) {
 				this.graph.smooth_lines = false;
 			}
-			console.log(this.heroes);
 		},
 		"graph.smooth_lines": function() {
 			if (this.graph.smooth_lines) {
@@ -198,7 +197,7 @@ const app = new Vue({
 					if (matches.length > 1)
 					{
 						// only set matches if it was successful
-						matches.sort(m => m.start_time);
+						matches.sort((a, b) => a.start_time - b.start_time);
 						self.matches = matches;
 					}
 				})
