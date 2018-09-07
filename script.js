@@ -209,6 +209,7 @@ const app = new Vue({
 					{
 						// only set player_info if it was successful
 						self.player_info = player_info;
+						localStorage["player_id"] = this.player_id;
 					}
 				})
 				.catch(error => alert(error));
@@ -219,6 +220,6 @@ const app = new Vue({
 		this.debouncedGetPlayerMatches = _.debounce(this.getPlayerMatches, 200);
 		this.debouncedRecreateGraph = _.debounce(recreateGraph, 200);
 
-		this.player_id = 95211699;
+		this.player_id = parseInt(localStorage["player_id"] || "95211699");
 	}
 })
