@@ -4,10 +4,13 @@
 <meta content="utf-8" http-equiv="encoding">
 
 <head>
-	<link rel="stylesheet" src="sygraph.css" />
+	<link rel="stylesheet" href="player-lookup.css" />
 	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
 </head>
 <style>
+* {
+	box-sizing: border-box;
+}
 html, body{
 	padding: 0;
 	margin: 0;
@@ -19,9 +22,13 @@ body {
 	font-family: 'Roboto', sans-serif;
 	font-weight: 500;
 	height: 100%;
-	max-height: 100%;
 	width: 100%;
+	max-height: 100%;
 	max-width: 100%;
+}
+#app {
+	height: 100%;
+	width: 100%;
 	display: flex;
 }
 #graphdiv {
@@ -46,9 +53,6 @@ h2 {
 	margin-top: 10px;
 	margin-bottom: 5px;
 }
-#app {
-	margin-top: 20px;
-}
 #graphtitle {
 	position: fixed;
 	width: 100%;
@@ -62,14 +66,18 @@ h2 {
 </style>
 
 <body>
-	<div id="graphdiv"></div>
-	<div id="sidebar">
-		<div id="app">
+	<div id="app">
+		<div id="graphdiv" v-on:click="graphClick">
+		</div>
+		<div id="sidebar">
 			<div id="graphtitle">
 				{{title}}
 			</div>
-			<label for="player_id">Player ID</label>
-			<input id="player_id" type="number" v-model="player_id" placeholder="Steam ID">
+			<h2>Player</h2>
+			<player-lookup
+				:current_player="player"
+				v-on:selected-player="selectedPlayer">
+			</player-lookup>
 			<h2>Graph Options</h2>
 			<input id="graph_smooth_lines" type="checkbox" v-model="graph.smooth_lines">
 			<label for="graph_smooth_lines">Smooth Lines</label>
@@ -104,8 +112,8 @@ h2 {
 				</tr>
 			</table>
 		</div>
-		<div id="legend"></div>
 	</div>
+	<div id="legend"></div>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
@@ -113,5 +121,6 @@ h2 {
 <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
 <script src="smooth-plotter.js"></script>
+<script src="player-lookup.js"></script>
 <script src="heroes.js"></script>
 <script src="script.js"></script>

@@ -1,0 +1,68 @@
+.player-lookup {
+	position: relative;
+	max-width: 200px;
+}
+
+.player-lookup > input {
+	padding: 4px;
+	width: 100%;
+	position: relative
+}
+
+.player-lookup-current {
+	pointer-events: none;
+	position: absolute;
+	left: 1px;
+	top: 1px;
+	right: 1px;
+	bottom: 1px;
+	white-space: nowrap;
+	overflow-x: hidden;
+}
+
+.player-lookup-current img {
+	height: 100%;
+}
+
+.player-lookup-current span {
+	position: absolute;
+	left: 26px;
+	padding: 3px;
+}
+
+.player-lookup > div {
+	position: absolute;
+	background: white;
+	top: 100%;
+	left: 0;
+	right: 0;
+	border: 1px solid black;
+	border-radius: 0 0 3px 3px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	max-height: 300px;
+	min-height: 24px;
+}
+
+.player-lookup-option {
+	float: left;
+	white-space: nowrap;
+	width: 100%;
+	cursor: pointer;
+}
+
+.player-lookup-option:hover {
+	background: #dddddd;
+}
+
+.player-lookup-option img {
+	vertical-align: middle;
+	width: 32px;
+	height: 32px;
+}
+
+.player-lookup-status {
+	font-size: 14px;
+	padding: 2px;
+	color: #444444;
+}

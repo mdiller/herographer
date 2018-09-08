@@ -1,3 +1,9 @@
+const default_player = {
+	"account_id": 95211699,
+	"personaname": "Bilbo's Last Clean Doily",
+	"avatarfull": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/26/26f39ad1bfbede565f1e7f0399b8afd40d74c74e_full.jpg"
+};
+
 const is_timestamp_in_range = (current_timestamp, timestamp, range) => {
 	var start = current_timestamp - (range / 2);
 	var end = current_timestamp + (range / 2);
@@ -131,9 +137,8 @@ function recreateGraph(self) {
 const app = new Vue({
 	el: '#app',
 	data: {
-		player_id: null,
+		player: {},
 		matches: [],
-		player_info: {},
 		graph: {
 			stacked: false,
 			smooth_lines: true,
@@ -147,18 +152,19 @@ const app = new Vue({
 	},
 	computed: {
 		title() {
-			if (this.player_info && this.player_info.profile && this.player_info.profile.personaname) {
-				return `${this.player_info.profile.personaname}'s Most Played Heroes`;
+			if (this.player && this.player.personaname) {
+				return `${this.player.personaname}'s Most Played Heroes`;
 			}
 			else {
-				return "Loading...";
+				return "Select a Player";
 			}
 		}
 	},
 	watch: {
-		player_id() {
+		player() {
 			// debounce here
 			this.debouncedGetPlayerMatches();
+			localStorage["player"] = JSON.stringify(this.player);
 		},
 		matches() {
 			this.debouncedRecreateGraph(this);
@@ -191,7 +197,7 @@ const app = new Vue({
 	methods: {
 		getPlayerMatches: function() {
 			var self = this;
-			axios.get(`https://api.opendota.com/api/players/${this.player_id}/matches`)
+			axios.get(`https://api.opendota.com/api/players/${this.player.account_id}/matches`)
 				.then(response => {
 					var matches = response.data;
 					if (matches.length > 1)
@@ -202,17 +208,13 @@ const app = new Vue({
 					}
 				})
 				.catch(error => alert(error));
-			axios.get(`https://api.opendota.com/api/players/${this.player_id}`)
-				.then(response => {
-					var player_info = response.data;
-					if (player_info && player_info.profile)
-					{
-						// only set player_info if it was successful
-						self.player_info = player_info;
-						localStorage["player_id"] = this.player_id;
-					}
-				})
-				.catch(error => alert(error));
+		},
+		selectedPlayer(player) {
+			this.player = player;
+		},
+		graphClick() {
+			console.log("hi");
+			window.location.hash = '#app';
 		}
 	},
 	created() {
@@ -220,6 +222,11 @@ const app = new Vue({
 		this.debouncedGetPlayerMatches = _.debounce(this.getPlayerMatches, 200);
 		this.debouncedRecreateGraph = _.debounce(recreateGraph, 200);
 
-		this.player_id = parseInt(localStorage["player_id"] || "95211699");
+		try {
+			this.player = JSON.parse(localStorage["player"]);
+		}
+		catch(err) {
+			this.player = default_player;
+		}
 	}
 })
