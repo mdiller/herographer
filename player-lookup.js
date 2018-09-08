@@ -21,12 +21,14 @@ var player_lookup_vm = Vue.component('player-lookup', {
 		}
 	},
 	methods: {
-		onFocused(event) {
+		startEdit() {
 			this.focused = true;
+			this.$refs.input.focus();
 		},
-		unFocus() {
+		endEdit() {
 			this.focused = false;
 			this.input = '';
+			this.$refs.input.blur();
 		},
 		searchPlayers() {
 			var self = this;
@@ -41,39 +43,49 @@ var player_lookup_vm = Vue.component('player-lookup', {
 					}
 				})
 				.catch(error => {
-					console.log("error on search")
+					console.log("error on search");
 					// console.log(error);
 				});
 		},
 		selectedPlayer(player) {
-			this.$emit('selected-player', player);
-			this.unFocus();
+			if (player) {
+				this.$emit('update:current_player', player);
+				this.endEdit();
+			}
 		}
 	},
 	created() {
 		this.debouncedSearchPlayers = _.debounce(this.searchPlayers, 400);
-		this.debouncedUnFocus = _.debounce(this.unFocus, 100);
 	},
 	template: `
 	<div 
+		@click="startEdit"
+		@focus="startEdit"
 		class="player-lookup">
 		<input
+			ref="input"
 			type="text"
 			:placeholder="focused ? 'Player Name or ID...' : ''"
 			v-model="input"
-			v-on:focus="onFocused"
-			v-on:focusout="debouncedUnFocus">
+			@focus.prevent="startEdit"
+			@blur="endEdit"
+			@keyup.esc="endEdit"
+			@keyup.enter="selectedPlayer(players[0])">
 		<span class="player-lookup-current" v-if="!focused">
 			<img :src="current_player.avatarfull">
 			<span>
 				{{current_player.personaname || "Select a Player"}}
 			</span>
 		</span>
-		<div v-if="focused">
-			<div class="player-lookup-status" v-if="players.length == 0">
+		<div v-if="focused" @mousedown.prevent>
+			<div class="player-lookup-status" v-if="players.length == 0" @mousedown.prevent>
 				{{status}}
 			</div>
-			<div class="player-lookup-option" v-for="player in players" v-on:click="selectedPlayer(player)">
+			<div 
+				class="player-lookup-option" 
+				v-for="player in players" 
+				@click.stop="selectedPlayer(player)"
+				@mousedown.prevent>
 				<img :src="player.avatarfull">
 				{{player.personaname}}
 			</div>

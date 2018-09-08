@@ -139,6 +139,7 @@ const app = new Vue({
 	data: {
 		player: {},
 		matches: [],
+		loading: false,
 		graph: {
 			stacked: false,
 			smooth_lines: true,
@@ -163,7 +164,7 @@ const app = new Vue({
 	watch: {
 		player() {
 			// debounce here
-			this.debouncedGetPlayerMatches();
+			this.getPlayerMatches();
 			localStorage["player"] = JSON.stringify(this.player);
 		},
 		matches() {
@@ -197,6 +198,7 @@ const app = new Vue({
 	methods: {
 		getPlayerMatches: function() {
 			var self = this;
+			this.loading = true;
 			axios.get(`https://api.opendota.com/api/players/${this.player.account_id}/matches`)
 				.then(response => {
 					var matches = response.data;
@@ -206,20 +208,19 @@ const app = new Vue({
 						matches.sort((a, b) => a.start_time - b.start_time);
 						self.matches = matches;
 					}
+					this.loading = false;
 				})
-				.catch(error => alert(error));
-		},
-		selectedPlayer(player) {
-			this.player = player;
+				.catch(error => {
+					console.log("error occured while retrieving matches");
+					this.loading = false;
+				});
 		},
 		graphClick() {
-			console.log("hi");
 			window.location.hash = '#app';
 		}
 	},
 	created() {
 		// fetch call here that sets products
-		this.debouncedGetPlayerMatches = _.debounce(this.getPlayerMatches, 200);
 		this.debouncedRecreateGraph = _.debounce(recreateGraph, 200);
 
 		try {

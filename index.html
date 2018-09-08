@@ -36,6 +36,10 @@ body {
 	height: 98%;
 	width: 85%;
 	flex: 85%;
+	transition: filter 1s;
+}
+.blurred {
+	filter: blur(5px);
 }
 #sidebar {
 	width: 15%;
@@ -68,16 +72,17 @@ h2 {
 
 <body>
 	<div id="app">
-		<div id="graphdiv" v-on:click="graphClick">
+		<div 
+			id="graphdiv" 
+			@click="graphClick"
+			:class="{ blurred: loading }">
 		</div>
 		<div id="sidebar">
 			<div id="graphtitle">
 				{{title}}
 			</div>
 			<h2>Player</h2>
-			<player-lookup
-				:current_player="player"
-				v-on:selected-player="selectedPlayer">
+			<player-lookup :current_player.sync="player">
 			</player-lookup>
 			<h2>Graph Options</h2>
 			<input id="graph_smooth_lines" type="checkbox" v-model="graph.smooth_lines">
