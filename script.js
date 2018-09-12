@@ -123,7 +123,7 @@ function recreateGraph(self) {
 		dyData,
 		{
 			fillGraph: graph.fill,
-			fillAlpha: 1.0,
+			fillAlpha: graph.fill ? 1.0 : 0,
 			stackedGraph: graph.stacked,
 			labels: dyLabels,
 			series: dySeries,
