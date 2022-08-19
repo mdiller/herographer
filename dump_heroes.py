@@ -15,7 +15,7 @@ for hero in session.query(Hero):
     }
 
 text = json.dumps(data, indent='\t')
-text = "var heroes = " + text
+text = "var hero_information = " + text
 
 with open("heroes.js", "w+") as f:
     f.write(text)
