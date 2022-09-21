@@ -6,34 +6,21 @@
 <head>
 	<title>Hero Grapher</title>
 	<link rel="stylesheet" href="player-lookup.css" />
-	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
+	<link href="https://tools.dillerm.io/lib/dillerm.css?version=dev" rel="stylesheet" type="text/css">
 </head>
 <style>
-* {
-	box-sizing: border-box;
-}
-html, body{
-	padding: 0;
-	margin: 0;
-}
-html{
-	height: 100%;
-}
-body {
-	font-family: 'Roboto', sans-serif;
-	font-weight: 500;
-	height: 100%;
-	width: 100%;
-	max-height: 100%;
-	max-width: 100%;
-}
+
 #app {
-	height: 100%;
-	width: 100%;
 	display: flex;
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	padding-top: var(--navbar-height);
 }
 #graphdiv {
-	height: 98%;
+	height: 100%;
 	width: 85%;
 	flex: 85%;
 	transition: filter 1s;
@@ -61,26 +48,35 @@ h2 {
 #graphtitle {
 	position: fixed;
 	width: 100%;
-	top: 0;
+	top: var(--navbar-height);
 	left: 0;
-	padding: 50px;
-	font-size: 30px;
+	padding: 30px;
+	font-size: 28px;
 	text-align: center;
 	pointer-events: none;
+	margin: none;
 }
+
+/* newstuff */
+
+body {
+	height: 100vh;
+}
+
 </style>
 
 <body>
-	<div id="app">
+	<div id="navbar"></div>
+	<div id="app" class="dillerm">
+		<h1 id="graphtitle">
+			{{title}}
+		</h1>
 		<div 
 			id="graphdiv" 
 			@click="graphClick"
 			:class="{ blurred: loading }">
 		</div>
 		<div id="sidebar">
-			<div id="graphtitle">
-				{{title}}
-			</div>
 			<h2>Player</h2>
 			<player-lookup :current_player.sync="player">
 			</player-lookup>
@@ -119,14 +115,16 @@ h2 {
 			</table>
 		</div>
 	</div>
-	<div id="legend"></div>
+	<!-- <div id="legend"></div> -->
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
+<script src="https://tools.dillerm.io/lib/dillerm.umd.js?version=dev"></script>
 <script src="lib/vue2.min.js"></script>
 <script src="smooth-plotter.js"></script>
 <script src="player-lookup.js"></script>
 <script src="heroes.js"></script>
+<script src="parameters.js"></script>
 <script src="script.js"></script>

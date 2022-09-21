@@ -18,6 +18,27 @@ function getDayString(date) {
 	});
 }
 
+function playerSearchFunc(input, callback) {
+	if (input.length == 0) {
+		callback([]);
+		return;
+	}
+	fetch(`https://api.opendota.com/api/search?q=${input}`)
+		.then((response) => response.json())
+		.then(data => {
+			data = (data || []).map(player => { return {
+				id: player.account_id,
+				label: player.personaname,
+				icon: player.avatarfull
+			}});
+			callback(data, data.length == 0 ? "None Found" : undefined);
+		})
+		.catch(error => {
+			console.log(`error on search: ${error}`);
+			callback([], "Error on Search");
+		});
+}
+
 function recreateGraph(self) {
 	var matches = self.matches;
 	var graph = self.graph;
@@ -196,6 +217,9 @@ const app = new Vue({
 		}
 	},
 	methods: {
+		configCallback(config) {
+			// console.dir(config);
+		},
 		getPlayerMatches: function() {
 			var self = this;
 			this.loading = true;
@@ -230,4 +254,12 @@ const app = new Vue({
 			this.player = default_player;
 		}
 	}
-})
+});
+
+
+PARAMETERS_DEFINITION[0].options = playerSearchFunc;
+DillermWebUtils.init("#navbar", {
+	github_url: "https://github.com/mdiller/herographer",
+	parameters: PARAMETERS_DEFINITION,
+	parameters_callback: app.configCallback
+});
